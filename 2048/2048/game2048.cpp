@@ -274,7 +274,7 @@ bool Game2048::right() {
 
 void Game2048::add() {
 	int pos, i, j;
-	srand(time(NULL));
+	srand((unsigned)time(NULL));
 	do {
 		pos = rand() % 16;
 		i = pos / 4;
@@ -285,12 +285,11 @@ void Game2048::add() {
 };
 
 bool Game2048::full() const {
-	printf("occupied = %d\n", occupied);
 	return occupied == 16;
 };
 
 bool Game2048::fail() const {
-	return status == -1;
+	return full() && (mergable() == UNMERGEABLE);
 }
 
 bool Game2048::win() const {
