@@ -12,7 +12,7 @@ void ConsoleGame2048::run()
 {
 	printf("Start game.\n");
 	printf("Use WSAD or ¡ü¡ý¡û¡ú to control the direction.\n");
-	game.print();
+	print();
 	int key_code, opt, ret;
 	while (1) {
 		key_code = _getch();
@@ -54,16 +54,16 @@ void ConsoleGame2048::run()
 		}
 		switch (opt) {
 		case OPT_UP:
-			ret = game.Up();
+			ret = Up();
 			break;
 		case OPT_LEFT:
-			ret = game.Left();
+			ret = Left();
 			break;
 		case OPT_DOWN:
-			ret = game.Down();
+			ret = Down();
 			break;
 		case OPT_RIGHT:
-			ret = game.Right();
+			ret = Right();
 			break;
 		default:
 			goto label_exit;
@@ -71,14 +71,14 @@ void ConsoleGame2048::run()
 		}
 		system("cls");
 		printf("Use WSAD or ¡ü¡ý¡û¡ú to control the direction.\n");
-		game.print();
+		print();
 		if (!ret) {
 			printf("Cannot move\n");
 		}
-		if (game.fail()) {
+		if (fail()) {
 			printf("You Lose\n");
 			goto label_exit;
-		} else if (game.win()) {
+		} else if (win()) {
 			printf("You Win\n");
 			goto label_exit;
 		}

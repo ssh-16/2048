@@ -1,23 +1,24 @@
 #pragma once
 
-#include <array>
+#include <vector>
 
-using std::array;
+using std::vector;
 
 class Game2048 {
 private:
-	array<array<int, 4>, 4> plane;
+	vector<vector<int>> plane;
+	int size;
+	int terminal;
+
 	int occupied;
 	int status;
-
-	// some constants
-	static const int TERMINAL = 2048;
 
 	// mergeable status
 	static const int UNMERGEABLE = 0x0;
 	static const int HORIZONTAL = 0x1;
 	static const int VERTICAL = 0x2;
 	static const int MERGEABLE = 0x3;
+
 
 	// private methods
 	bool up();
@@ -33,11 +34,16 @@ private:
 	bool full() const;
 
 public:
-	Game2048() {
-		for (int i = 0; i < 4; i++) {
-			for (int j = 0; j < 4; j++) {
-				plane[i][j] = 0;
-			}
+	static const int OPT_UP = 0;
+	static const int OPT_LEFT = 1;
+	static const int OPT_DOWN = 2;
+	static const int OPT_RIGHT = 3;
+
+	Game2048(int _size = 4, int _terminal = 2048) {
+		size = _size;
+		terminal = _terminal;
+		for (int i = 0; i < size; i++) {
+			plane.emplace_back(vector<int>(size, 0));
 		}
 		occupied = 0;
 		status = 0;
@@ -63,3 +69,19 @@ public:
 
 	bool win() const;
 };
+
+inline bool Game2048::full() const
+{
+	return occupied == size * size;
+};
+
+inline bool Game2048::fail() const
+{
+	return full() && (mergable() == UNMERGEABLE);
+}
+
+inline bool Game2048::win() const
+{
+	return status == 1;
+}
+

@@ -8,10 +8,14 @@
 
 using namespace std;
 
-void Game2048::print() const {
-	for (int i = 0; i < 4; i++) {
-		printf("+------+------+------+------+\n");
-		for (int j = 0; j < 4; j++) {
+void Game2048::print() const
+{
+	for (int i = 0; i < size; i++) {
+		for (int j = 0; j < size; j++) {
+			printf("+------");
+		}
+		printf("+\n");
+		for (int j = 0; j < size; j++) {
 			if (plane[i][j] != 0) {
 				printf("|%5d ", plane[i][j]);
 			} else {
@@ -20,21 +24,25 @@ void Game2048::print() const {
 		}
 		printf("|\n");
 	}
-	printf("+------+------+------+------+\n");
+	for (int j = 0; j < size; j++) {
+		printf("+------");
+	}
+	printf("+\n");
 }
 
-int Game2048::mergable() const {
+int Game2048::mergable() const
+{
 	int ret = UNMERGEABLE;
-	for (int i = 0; i < 4; i++) {
-		for (int j = 0; j < 3; j++) {
+	for (int i = 0; i < size; i++) {
+		for (int j = 0; j < size - 1; j++) {
 			if (plane[i][j] != 0 && plane[i][j] == plane[i][j + 1]) {
 				ret |= HORIZONTAL;
 				break;
 			}
 		}
 	}
-	for (int j = 0; j < 4; j++) {
-		for (int i = 0; i < 3; i++) {
+	for (int j = 0; j < size; j++) {
+		for (int i = 0; i < size - 1; i++) {
 			if (plane[i][j] != 0 && plane[i][j] == plane[i + 1][j]) {
 				ret |= VERTICAL;
 				break;
@@ -44,67 +52,46 @@ int Game2048::mergable() const {
 	return ret;
 }
 
-bool Game2048::Up() {
-	bool ret;
-	ret = up();
-	if (ret) {
-		add();
-		return true;
-	} else {
-		if (mergable() == UNMERGEABLE && full()) {
-			status = -1;
-		}
-		return false;
-	}
+#define MOVE_RETURN(direction) do {\
+	bool ret = direction(); \
+	if (ret) { \
+		add(); \
+		return true; \
+	} else { \
+		if (mergable() == UNMERGEABLE && full()) { \
+			status = -1; \
+		} \
+		return false; \
+	} \
+} while (0)
+
+bool Game2048::Up()
+{
+	MOVE_RETURN(up);
 }
 
-bool Game2048::Left() {
-	bool ret;
-	ret = left();
-	if (ret) {
-		add();
-		return true;
-	} else {
-		if (mergable() == UNMERGEABLE && full()) {
-			status = -1;
-		}
-		return false;
-	}
+bool Game2048::Left()
+{
+	MOVE_RETURN(left);
 }
 
-bool Game2048::Down() {
-	bool ret;
-	ret = down();
-	if (ret) {
-		add();
-		return true;
-	} else {
-		if (mergable() == UNMERGEABLE && full()) {
-			status = -1;
-		}
-		return false;
-	}
+bool Game2048::Down()
+{
+	MOVE_RETURN(down);
 }
 
-bool Game2048::Right() {
-	bool ret;
-	ret = right();
-	if (ret) {
-		add();
-		return true;
-	} else {
-		if (mergable() == UNMERGEABLE && full()) {
-			status = -1;
-		}
-		return false;
-	}
+bool Game2048::Right()
+{
+	MOVE_RETURN(right);
 }
 
-bool Game2048::up() {
+bool Game2048::up()
+{
 	bool movable = false;
-	for (int j = 0; j < 4; j++) {
-		int count = 0, i = 0;
-		for (i = 0; i < 4; i++) {
+	int i, j, count;
+	for (j = 0; j < size; j++) {
+		count = 0;
+		for (i = 0; i < size; i++) {
 			if (plane[i][j] != 0) {
 				if (count != i) {
 					movable = true;
@@ -112,14 +99,14 @@ bool Game2048::up() {
 				plane[count++][j] = plane[i][j];
 			}
 		}
-		for (i = count; i < 4; i++) {
+		for (i = count; i < size; i++) {
 			plane[i][j] = 0;
 		}
 		i = 0;
-		while (i < 3) {
+		while (i < size - 1) {
 			if (plane[i][j] != 0 && plane[i][j] == plane[i + 1][j]) {
 				plane[i][j] *= 2;
-				if (plane[i][j] == TERMINAL) {
+				if (plane[i][j] == terminal) {
 					status = 1;
 				}
 				plane[i + 1][j] = 0;
@@ -131,23 +118,25 @@ bool Game2048::up() {
 			}
 		}
 		count = 0;
-		for (i = 0; i < 4; i++) {
+		for (i = 0; i < size; i++) {
 			if (plane[i][j] != 0) {
 				plane[count++][j] = plane[i][j];
 			}
 		}
-		for (i = count; i < 4; i++) {
+		for (i = count; i < size; i++) {
 			plane[i][j] = 0;
 		}
 	}
 	return movable;
 };
 
-bool Game2048::down() {
+bool Game2048::down()
+{
 	bool movable = false;
-	for (int j = 0; j < 4; j++) {
-		int count = 3, i = 3;
-		for (i = 3; i >= 0; i--) {
+	int i, j, count;
+	for (j = 0; j < size; j++) {
+		count = size - 1;
+		for (i = size - 1; i >= 0; i--) {
 			if (plane[i][j] != 0) {
 				if (count != i) {
 					movable = true;
@@ -158,11 +147,11 @@ bool Game2048::down() {
 		for (i = count; i >= 0; i--) {
 			plane[i][j] = 0;
 		}
-		i = 3;
+		i = size - 1;
 		while (i > 0) {
 			if (plane[i][j] != 0 && plane[i][j] == plane[i - 1][j]) {
 				plane[i][j] *= 2;
-				if (plane[i][j] == TERMINAL) {
+				if (plane[i][j] == terminal) {
 					status = 1;
 				}
 				plane[i - 1][j] = 0;
@@ -173,8 +162,8 @@ bool Game2048::down() {
 				i--;
 			}
 		}
-		count = 3;
-		for (i = 3; i >= 0; i--) {
+		count = size - 1;
+		for (i = size - 1; i >= 0; i--) {
 			if (plane[i][j] != 0) {
 				plane[count--][j] = plane[i][j];
 			}
@@ -186,11 +175,13 @@ bool Game2048::down() {
 	return movable;
 };
 
-bool Game2048::left() {
+bool Game2048::left()
+{
 	bool movable = false;
-	for (int i = 0; i < 4; i++) {
-		int count = 0, j = 0;
-		for (j = 0; j < 4; j++) {
+	int i, j, count;
+	for (i = 0; i < size; i++) {
+		count = 0;
+		for (j = 0; j < size; j++) {
 			if (plane[i][j] != 0) {
 				if (count != j) {
 					movable = true;
@@ -198,14 +189,14 @@ bool Game2048::left() {
 				plane[i][count++] = plane[i][j];
 			}
 		}
-		for (j = count; j < 4; j++) {
+		for (j = count; j < size; j++) {
 			plane[i][j] = 0;
 		}
 		j = 0;
-		while (j < 3) {
+		while (j < size - 1) {
 			if (plane[i][j] != 0 && plane[i][j] == plane[i][j + 1]) {
 				plane[i][j] *= 2;
-				if (plane[i][j] == TERMINAL) {
+				if (plane[i][j] == terminal) {
 					status = 1;
 				}
 				plane[i][j + 1] = 0;
@@ -217,23 +208,25 @@ bool Game2048::left() {
 			}
 		}
 		count = 0;
-		for (j = 0; j < 4; j++) {
+		for (j = 0; j < size; j++) {
 			if (plane[i][j] != 0) {
 				plane[i][count++] = plane[i][j];
 			}
 		}
-		for (j = count; j < 4; j++) {
+		for (j = count; j < size; j++) {
 			plane[i][j] = 0;
 		}
 	}
 	return movable;
 };
 
-bool Game2048::right() {
+bool Game2048::right()
+{
 	bool movable = false;
-	for (int i = 0; i < 4; i++) {
-		int count = 3, j = 3;
-		for (j = 3; j >= 0; j--) {
+	int i, j, count;
+	for (i = 0; i < size; i++) {
+		count = size - 1;
+		for (j = size - 1; j >= 0; j--) {
 			if (plane[i][j] != 0) {
 				if (count != j) {
 					movable = true;
@@ -244,11 +237,11 @@ bool Game2048::right() {
 		for (j = count; j >= 0; j--) {
 			plane[i][j] = 0;
 		}
-		j = 3;
+		j = size - 1;
 		while (j > 0) {
 			if (plane[i][j] != 0 && plane[i][j] == plane[i][j - 1]) {
 				plane[i][j] *= 2;
-				if (plane[i][j] == TERMINAL) {
+				if (plane[i][j] == terminal) {
 					status = 1;
 				}
 				plane[i][j - 1] = 0;
@@ -259,8 +252,8 @@ bool Game2048::right() {
 				j--;
 			}
 		}
-		count = 3;
-		for (j = 3; j >= 0; j--) {
+		count = size - 1;
+		for (j = size - 1; j >= 0; j--) {
 			if (plane[i][j] != 0) {
 				plane[i][count--] = plane[i][j];
 			}
@@ -272,27 +265,15 @@ bool Game2048::right() {
 	return movable;
 };
 
-void Game2048::add() {
+void Game2048::add()
+{
 	int pos, i, j;
 	srand((unsigned)time(NULL));
 	do {
-		pos = rand() % 16;
-		i = pos / 4;
-		j = pos % 4;
+		pos = rand() % (size * size);
+		i = pos / size;
+		j = pos % size;
 	} while (plane[i][j] != 0);
 	plane[i][j] = 2;
 	occupied++;
 };
-
-bool Game2048::full() const {
-	return occupied == 16;
-};
-
-bool Game2048::fail() const {
-	return full() && (mergable() == UNMERGEABLE);
-}
-
-bool Game2048::win() const {
-	return status == 1;
-}
-

@@ -2,10 +2,8 @@
 
 #include "game2048.h"
 
-class ConsoleGame2048 {
+class ConsoleGame2048: public Game2048 {
 private:
-	Game2048 game;
-
 	// some constants for keyboard control.
 	static const int KEY_LOWER_W = 0x77;
 	static const int KEY_LOWER_A = 0x61;
@@ -17,11 +15,7 @@ private:
 	static const int KEY_ARROW_DOWN = 0x50;
 	static const int KEY_ARROW_RIGHT = 0x4d;
 
-	static const int OPT_UP = 0;
-	static const int OPT_LEFT = 1;
-	static const int OPT_DOWN = 2;
-	static const int OPT_RIGHT = 3;
-
 public:
+	ConsoleGame2048(int _size = 4, int _terminal = 2048) : Game2048(_size, _terminal) {};
 	void run();
 };
